@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { useApiHealth } from "@/hooks/use-api-health";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
@@ -68,14 +69,14 @@ const activities = [
 
 const stats = [
   {
-    label: "API Status",
-    value: "Operational",
-    detail: "All API services healthy",
-  },
-  {
-    label: "AI Requests",
+    label: "API Requests",
     value: "24.8K",
     detail: "+18.4% this month",
+  },
+  {
+    label: "AI Conversations",
+    value: "186",
+    detail: "+24 this month",
   },
   {
     label: "Projects",
@@ -89,13 +90,38 @@ const stats = [
   },
 ];
 
+const platformServices = [
+  "Web application",
+  "API services",
+  "AI Assistant",
+  "Database",
+];
+
 export default function DashboardPage() {
+  const {
+    data: health,
+    isLoading: isHealthLoading,
+    isError: isHealthError,
+  } = useApiHealth();
+
   const [showAllProjects, setShowAllProjects] = useState(false);
 
   const visibleProjects = useMemo(
     () => (showAllProjects ? projects : projects.slice(0, 3)),
     [showAllProjects],
   );
+
+  const apiStatus = isHealthLoading
+    ? "Checking..."
+    : health?.status === "ok"
+      ? "Operational"
+      : "Unavailable";
+
+  const apiStatusDetail = isHealthLoading
+    ? "Checking API connectivity..."
+    : isHealthError
+      ? "Unable to reach the API."
+      : "Backend and database are healthy.";
 
   return (
     <section className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
@@ -134,6 +160,41 @@ export default function DashboardPage() {
             <p className="text-muted mt-2 text-xs">{stat.detail}</p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
+        <div className="border-border bg-background rounded-xl border p-5">
+          <p className="text-muted text-sm font-medium">API Status</p>
+
+          <div className="mt-3 flex items-center gap-2">
+            <span
+              className={cn(
+                "size-2.5 rounded-full",
+                isHealthLoading
+                  ? "bg-muted"
+                  : isHealthError
+                    ? "bg-destructive"
+                    : "bg-primary",
+              )}
+            />
+
+            <p className="text-3xl font-semibold tracking-tight">{apiStatus}</p>
+          </div>
+
+          <p className="text-muted mt-2 text-xs">{apiStatusDetail}</p>
+        </div>
+
+        <div className="border-border bg-background rounded-xl border p-5">
+          <p className="text-muted text-sm font-medium">Backend response</p>
+
+          <p className="mt-3 text-sm font-medium">
+            {health?.status ?? "No response"}
+          </p>
+
+          <p className="text-muted mt-2 text-xs">
+            Live status from the FastAPI health endpoint.
+          </p>
+        </div>
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
@@ -263,24 +324,47 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-5 p-6">
-            {[
-              ["Web application", "Operational"],
-              ["API services", "Operational"],
-              ["AI Assistant", "Operational"],
-              ["Database", "Operational"],
-            ].map(([service, status]) => (
-              <div
-                key={service}
-                className="flex items-center justify-between gap-4"
-              >
-                <span className="text-sm font-medium">{service}</span>
+            {platformServices.map((service) => {
+              const isApiService = service === "API services";
+              const isDatabase = service === "Database";
 
-                <span className="text-primary flex items-center gap-2 text-xs font-medium">
-                  <span className="bg-primary size-2 rounded-full" />
-                  {status}
-                </span>
-              </div>
-            ))}
+              const serviceStatus = isApiService
+                ? apiStatus
+                : isDatabase
+                  ? isHealthLoading
+                    ? "Checking..."
+                    : isHealthError
+                      ? "Unavailable"
+                      : "Operational"
+                  : "Operational";
+
+              const isOperational = serviceStatus === "Operational";
+
+              return (
+                <div
+                  key={service}
+                  className="flex items-center justify-between gap-4"
+                >
+                  <span className="text-sm font-medium">{service}</span>
+
+                  <span
+                    className={cn(
+                      "flex items-center gap-2 text-xs font-medium",
+                      isOperational ? "text-primary" : "text-muted",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "size-2 rounded-full",
+                        isOperational ? "bg-primary" : "bg-muted",
+                      )}
+                    />
+
+                    {serviceStatus}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

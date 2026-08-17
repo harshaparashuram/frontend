@@ -3,8 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import DashboardPage from "@/app/(dashboard)/dashboard/page";
 
-vi.mock("next/navigation", () => ({
-  usePathname: () => "/dashboard",
+vi.mock("@/hooks/use-api-health", () => ({
+  useApiHealth: () => ({
+    data: {
+      status: "ok",
+    },
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 describe("DashboardPage", () => {
@@ -18,7 +24,13 @@ describe("DashboardPage", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText("API Status")).toBeInTheDocument();
-    expect(screen.getByText("AI Requests")).toBeInTheDocument();
+    expect(screen.getByText("API Requests")).toBeInTheDocument();
     expect(screen.getByText("Projects")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Backend and database are healthy."),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("ok")).toBeInTheDocument();
   });
 });
