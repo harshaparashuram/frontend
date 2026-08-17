@@ -12,7 +12,7 @@ const navigation = [
   },
   {
     label: "AI Assistant",
-    href: "/dashboard/ai",
+    href: "/dashboard/assistant",
   },
   {
     label: "Projects",
@@ -32,26 +32,29 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="border-border bg-surface hidden w-64 shrink-0 border-r lg:block">
-      <div className="sticky top-0 flex h-[calc(100vh-4rem)] flex-col p-4">
-        <div className="mb-6 px-3">
+    <aside className="border-border bg-background hidden w-64 shrink-0 border-r lg:block">
+      <div className="flex h-full min-h-[calc(100vh-4rem)] flex-col">
+        <div className="px-6 py-6">
           <p className="text-muted text-xs font-semibold tracking-wider uppercase">
             Platform
           </p>
         </div>
 
-        <nav className="space-y-1">
+        <nav className="flex flex-col gap-1 px-4" aria-label="Dashboard">
           {navigation.map((item) => {
-            const active = pathname === item.href;
+            const isActive =
+              item.href === "/dashboard"
+                ? pathname === item.href
+                : pathname.startsWith(item.href);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-secondary text-secondary-foreground"
+                  "rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-surface-subtle text-foreground"
                     : "text-muted hover:bg-surface-muted hover:text-foreground",
                 )}
               >
@@ -61,11 +64,13 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="border-border bg-surface-muted mt-auto rounded-lg border p-4">
-          <p className="text-foreground text-sm font-medium">AI Platform</p>
-          <p className="text-muted mt-1 text-xs leading-5">
-            Build, test and manage your AI applications.
-          </p>
+        <div className="mt-auto p-4">
+          <div className="border-border bg-surface-muted rounded-lg border p-4">
+            <p className="text-foreground text-sm font-medium">AI Platform</p>
+            <p className="text-muted mt-1 text-xs leading-5">
+              Build, test, and ship reliable AI systems.
+            </p>
+          </div>
         </div>
       </div>
     </aside>
