@@ -57,5 +57,5 @@ export function Button({ variant = "primary", className, ...props }: Props) {
 
   const buttonProps = props;
 
-  return <button {...buttonProps} className={styles} type="button" />;
+  return <button {...buttonProps} className={styles} />;
 }
