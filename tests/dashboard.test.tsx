@@ -13,6 +13,18 @@ vi.mock("@/hooks/use-api-health", () => ({
   }),
 }));
 
+vi.mock("@/hooks/use-app-info", () => ({
+  useAppInfo: () => ({
+    data: {
+      name: "Python Foundation API",
+      version: "0.1.0",
+      environment: "development",
+    },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 describe("DashboardPage", () => {
   it("renders the dashboard overview", () => {
     render(<DashboardPage />);
@@ -32,5 +44,11 @@ describe("DashboardPage", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText("ok")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Python Foundation API v0.1.0"),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("Environment: development")).toBeInTheDocument();
   });
 });

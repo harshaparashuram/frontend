@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { useApiHealth } from "@/hooks/use-api-health";
+import { useAppInfo } from "@/hooks/use-app-info";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
@@ -104,6 +105,12 @@ export default function DashboardPage() {
     isError: isHealthError,
   } = useApiHealth();
 
+  const {
+    data: appInfo,
+    isLoading: isAppInfoLoading,
+    isError: isAppInfoError,
+  } = useAppInfo();
+
   const [showAllProjects, setShowAllProjects] = useState(false);
 
   const visibleProjects = useMemo(
@@ -122,6 +129,14 @@ export default function DashboardPage() {
     : isHealthError
       ? "Unable to reach the API."
       : "Backend and database are healthy.";
+
+  const appInfoStatus = isAppInfoLoading
+    ? "Loading application information..."
+    : isAppInfoError
+      ? "Unable to load application information."
+      : appInfo
+        ? `${appInfo.name} v${appInfo.version}`
+        : "No application information";
 
   return (
     <section className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
@@ -365,6 +380,20 @@ export default function DashboardPage() {
                 </div>
               );
             })}
+
+            <div className="border-border border-t pt-5">
+              <p className="text-muted text-xs font-medium tracking-wide uppercase">
+                Application
+              </p>
+
+              <p className="mt-2 text-sm font-medium">{appInfoStatus}</p>
+
+              {appInfo && (
+                <p className="text-muted mt-1 text-xs">
+                  Environment: {appInfo.environment}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
